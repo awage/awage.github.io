@@ -1,0 +1,29 @@
+{ 
+    "title": {
+        "mainTitle": "Principio di Archimede",
+        "smallTitle": "Spingere Legge"                
+    },
+    "controls": {
+        "objMass": "Massa dell'oggetto",
+        "objVolume": "Volume dell'oggetto",
+        "fluidDensity": "Densità del fluido"
+    },
+    "grid": {
+        "weightForceGridTitle" : "Risultati di peso",             
+        "weightForce": "Forza peso(N)",
+        "thrustForce": "Forza spingere(N)",
+        "totalForce": "Forza totale(N)",
+        "densityGridTitle" : "Risultati di densità",                        
+        "objDensity": "Densità dell'oggetto(kg/m<sup>3</sup>)",
+        "fluidDensity": "Densità del fluido(kg/m<sup>3</sup>)",
+        "volumeGridTitle" : "Risultati di volume",                         
+        "emergedVolume": "Volume emerso(m<sup>3</sup>)",
+        "submergedVolume": "Volume sommerso(m<sup>3</sup>)",
+        "totalVolume": "Volume totale(m<sup>3</sup>)"
+    },
+    "vector": {
+        "weightForce": "Peso",
+        "thrustForce": "Spingere",
+        "totalForce": "Totale"        
+    }
+}

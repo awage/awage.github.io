@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Simulation Menu</title>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <link rel="shortcut icon" href="img/urjc.ico" />
+        
+        <!-- Estilos propios -->
+        <link href="css/styles.css" rel="stylesheet">  
+        <!-- Estilos bootstrap -->
+        <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap/bootstrap-responsive.min.css" rel="stylesheet">        
+        <!-- Estilos jquery -->
+        <link href="css/jquery/jquery-ui/custom/jquery-ui.custom.min.css" rel="stylesheet">        
+        
+        <!-- Scripts propios -->           
+        <script src="js/languajeSelector.js"></script>
+        <script src="js/locales.js"></script>        
+        <!-- Scripts bootstrap -->
+        <script src="js/libs/bootstrap/bootstrap.min.js"></script>        
+        <!-- Scripts jquery -->
+        <script src="js/libs/jquery/jquery.min.js"></script>
+        <script src="js/libs/jquery/jquery-migrate.js"></script>   
+        <script src="js/libs/jquery/mousewheel/jquery.mousewheel.js"></script>
+        <script src="js/libs/jquery/cloudCarousel/CloudCarousel.min.js"></script>   
+        <!-- Scripts i18next -->
+        <script src="js/libs/i18next/i18next.min.js"></script>            
+                
+    </head>
+    <body>
+        <div id="wrap">   
+            
+            <div id="languageSelector" style="float: left">
+                <a href="#" onclick="loadSpanishLanguage();">
+                    <img src="img/flags/spanishFlag.png" width="32" height="32" title="Castellano" alt="Castellano"/>
+                </a>
+                <br>
+                <a href="#" onclick="loadEnglishLanguage();">
+                    <img src="img/flags/englishFlag.png" width="32" height="32" title="English" alt="English"/>
+                </a>
+                <br>                
+                <a href="#" onclick="loadFrenchLanguage();">
+                    <img src="img/flags/frenchFlag.png" width="32" height="32" title="Française" alt="Française"/>
+                </a>      
+                <br>
+                <a href="#" onclick="loadItalianLanguage();">
+                    <img src="img/flags/italianFlag.png" width="32" height="32" title="Italiano" alt="Italiano"/>
+                </a>                  
+            </div>               
+            
+            <div class="container">                            
+                <div id="maincontent">            
+                    <center>
+                        <div class="page-header">
+                            <h2>
+                                <span id="appMainTitle" data-i18n="mainPage.carouselTitle"></span>
+                            </h2>
+                        </div>                        
+
+                        <div id ="applicationsCarousel">
+                            <a id="thrustLawLink" href="../../ThurstLaw/public_html/index.html">
+                                <img id="thrustLawIcon" class="cloudcarousel" src="img/carousel/thrustLawIcon.png" width="128" height="128" />
+                            </a>
+
+                            <a id="inclinedPlaneLink" href="../../InclinedPlane/public_html/index.html">
+                                <img id="inclinedPlaneIcon" border="0" class="cloudcarousel" src="img/carousel/inclinedPlaneIcon2Alfa.png" alt="Plano inclinado" title="Plano inclinado" width="128" height="128" />
+                            </a>
+
+                            <a id="futureSimulationsLink" href="futureSumlations.html"> 
+                                <img id="futureSimulationsIcon" border="0" class="cloudcarousel" src="img/carousel/underConstruction.png" alt="Futuras simulaciones" title="Futuras simulaciones" width="128" height="128" />
+                            </a>
+                        </div>
+
+                        <div id="infoApplicationsCarousel">   
+                            <p id="titleTextCarousel"></p>
+                            <input id="leftButtonCarousel"  type="image" src="img/carousel/Back.png" title="Left" value="Left" width="64" height="64" />
+                            <input id="rightButtonCarousel" type="image" src="img/carousel/Forward.png" title="Right" value="Right" width="64" height="64" />
+                        </div>                  
+                    </center>
+                </div>    
+            </div>
+        </div>
+    
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#applicationsCarousel").CloudCarousel({
+                    xPos: 400,
+                    yPos: 50,
+                    buttonLeft: $("#leftButtonCarousel"),
+                    buttonRight: $("#rightButtonCarousel"),
+                    altBox: $("#altTextCarousel"),
+                    titleBox: $("#titleTextCarousel"),
+                    reflHeight:80,
+                    reflGap:1,
+                    FPS:30,            
+                    autoRotateDelay:1500,
+                    mouseWheel:"true",
+                    bringToFront:"true"
+                });
+                
+                //i18n
+                i18n.init({lng: 'es-ES', resStore: locales})
+                    .done(function(){
+                        $("#wrap").i18n();
+                    }
+                );               
+                
+                i18nForMenu();
+            }); 
+        </script>         
+    </body>
+</html>

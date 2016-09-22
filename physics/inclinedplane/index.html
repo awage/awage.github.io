@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Inclined Plane</title>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <link rel="shortcut icon" href="img/urjc.ico" />
+
+        <!-- Estilos propios -->
+        <link href="css/styles.css" rel="stylesheet">
+        <link href="css/pagePeel.css" rel="stylesheet">
+        <!-- Estilos bootstrap -->
+        <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap/bootstrap-responsive.min.css" rel="stylesheet">
+        <!-- Estilos jquery -->
+        <link href="css/jquery/slider/jquery.slider.min.css" rel="stylesheet">
+        <link href="css/jquery/jqgrid/ui.jqgrid.css" rel="stylesheet">
+        <link href="css/jquery/jquery-ui/custom/jquery-ui.custom.min.css" rel="stylesheet">
+
+        <!-- Scripts propios -->        
+        <script src="js/animation.js"></script>
+        <script src="js/canvasCalculations.js"></script>
+        <script src="js/constants.js"></script>
+        <script src="js/controls.js"></script>
+        <script src="js/grid.js"></script>
+        <script src="js/languajeSelector.js"></script>
+        <script src="js/locales.js"></script>
+        <script src="js/movement.js"></script>
+        <script src="js/pagePeel.js"></script>
+        <script src="js/physicsCalculations.js"></script>
+        <script src="js/state.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/vectors.js"></script>
+        <!-- Scripts bootstrap -->
+        <script src="js/libs/bootstrap/bootstrap.min.js"></script>
+        <!-- Scripts jquery -->
+        <script src="js/libs/jquery/jquery.min.js"></script>
+        <script src="js/libs/jquery/jquery-migrate.js"></script>
+        <script src="js/libs/jquery/slider/jquery.slider.min.js"></script>
+        <script src="js/libs/jquery/jqgrid/js/jquery.jqGrid.min.js"></script>
+        <!-- Scripts raphael -->
+        <script src="js/libs/raphael/raphael-src.js"></script>   
+        <!-- Scripts i18next -->
+        <script src="js/libs/i18next/i18next.min.js"></script>    
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+        
+    </head>
+    
+    <body>
+        <div id="wrap">
+            <div id='pageflip'>
+                <img id="pageFlipImg" src='img/pagePeel.png'/>
+                <div id="pageFlipMsg" class='msg_block'/>
+                </div>
+            </div>  
+            
+            <div id="languageSelector">
+                <a href="#" onclick="loadSpanishLanguage();">
+                    <img src="img/flags/spanishFlag.png" width="32" height="32" title="Castellano" alt="Castellano"/>
+                </a>
+                <br>
+                <a href="#" onclick="loadEnglishLanguage();">
+                    <img src="img/flags/englishFlag.png" width="32" height="32" title="English" alt="English"/>
+                </a>
+                <br>                
+                <a href="#" onclick="loadFrenchLanguage();">
+                    <img src="img/flags/frenchFlag.png" width="32" height="32" title="Française" alt="Française"/>
+                </a>      
+                <br>
+                <a href="#" onclick="loadItalianLanguage();">
+                    <img src="img/flags/italianFlag.png" width="32" height="32" title="Italiano" alt="Italiano"/>
+                </a>                  
+            </div>            
+            
+            <div id="elementTip"></div>
+            
+            <div class="container">                            
+                <div id="maincontent">
+                    <div id='maintext'>
+                        <div class='row'>
+                            <div class='span10'>
+                                <div class="page-header">
+                                    <h2>
+                                        <span id="appMainTitle" data-i18n="title.mainTitle"></span>
+                                    </h2>
+                                </div>
+                            </div>	
+                        </div>
+
+                        <div class='row'>
+                            <div id="raphaelCanvasEnvelope" class='span5'>
+                                <div id="raphaelCanvas">  
+                                </div>
+                            </div>
+
+                            <div id="controlsEnvelope" class="span7">
+                                <div class="control-group">
+                                    <div id="controlsDiv" class="controls span7">
+                                        <label class="entryControl"><span class="sliderSpan"><input id="objMass" type="slider" name="objMass" value = "350" /></span><span data-i18n="controls.objMass"></span></label>
+                                        <br>
+                                        <label class="entryControl"><span class="sliderSpan"><input id="pitch" type="slider" name="pitch" value = "20" /></span><span data-i18n="controls.pitch"></span></label>
+                                        <br>
+                                        <label class="entryControl"><span class="sliderSpan"><input id="frictionCoefficient" type="slider" name="frictionCoefficient" value = "0.70" /></span><span data-i18n="controls.frictionCoefficient"></span></label>
+                                        <br>
+                                        <label class="entryControl"><span id="extraForceSpan" class="showElement"><input id="extraForce" type="slider" name="extraForce" value = "0" /></span><span id="extraForceSpanText" class="showElement" data-i18n="controls.extraForce"></span></label>
+                                        <br>    
+                                        
+                                        <div class="topCheckbox">
+                                            <input type="checkbox" id="weightDecomposition" name="weightDecomposition" checked onchange="updateState()"> 
+                                            <span data-i18n="controls.weightDecomposition"></span>
+                                        </div>    
+                                        
+                                        <div class="normalCheckbox">
+                                            <input type="checkbox" id="enableExtraForce" name="enableExtraForce" checked onchange="updateExtraForceControls()"> 
+                                            <span data-i18n="controls.enableExtraForce"></span>
+                                        </div>                                          
+                                        
+                                        <div class="topGrid">
+                                            <table id="forceGrid"></table>
+                                        </div>
+
+                                        <div class="normalGrid">
+                                            <table id="weightGrid"></table>
+                                        </div>        
+                                        <div class="normalGrid">
+                                            <table id="totalForceGrid"></table>
+                                        </div>                                              
+                                        
+                                        <!--div style="margin-top: 15px">
+                                            <table id="weightForceGrid"></table>
+                                        </div>
+
+                                        <div style="margin-top: 10px">
+                                            <table id="otherForcesGrid"></table>
+                                        </div-->                                       
+                                  </div>                                                                          
+                                </div>                                                            
+                            </div>
+                        </div> 
+                    </div>
+                </div>     
+            </div>             
+        </div>
+        
+        <script>
+            $(document).ready(function(){
+                //creación del efecto page peel
+                createPagePeelEffect();
+            });
+            
+            $(document).mousemove(function(e){
+                if (mouseOverElement){
+                  elementTip.css("left", e.clientX+20).css("top", e.clientY+20);
+                  elementTip.text(elementTipText);
+                }
+            });            
+        </script>          
+        
+        <script>	
+            //inicializacion de variables globales
+            var weightForce;
+            var weightForce_X;
+            var weightForce_Y;
+            var normalForce;
+            var frictionForce;
+            var extraForce = 0;
+            var totalForce;
+            var mass = DEFAULT_OBJ_MASS;
+            var pitch = DEFAULT_PITCH;
+            var frictionCoefficient = DEFAULT_FRICTION_COEFFICIENT;
+            
+            var previousPitch = 0;
+            var previousObjectCenter_X = 0;
+            var previousObjectCenter_Y = 0;
+            var previousObjectRectCornerX = 0;
+            var previousObjectRectCornerY = 0;
+            
+            var objectCenter_X;
+            var objectCenter_Y;
+            var objectLeftBottomCorner_X;
+            var objectLeftBottomCorner_Y;
+      
+            var animationInProgress = false;
+            var mouseOverElement = false;
+            var elementTip =  $("#elementTip").hide();
+            var elementTipText = "";
+            
+            //inicialización de los vectores
+            var weightVector = null;
+            var weightVector_X = null;
+            var weightVectorDecompose_X = null;
+            var weightVector_Y = null;
+            var weightVectorDecompose_Y = null;
+            var normalVector = null;
+            var frictionVector = null;
+            var extraForceVector = null;
+            var totalVector = null;
+            
+            //i18n
+            i18n.init({lng: 'es-ES', resStore: locales})
+                .done(function(){
+                    $("#wrap").i18n();
+                }
+            );            
+            
+            //creación del marco de Raphael y borde del marco
+            var paper = Raphael(document.getElementById("raphaelCanvas"), MAX_X, MAX_Y);
+            var sqr = paper.rect(MIN_X + TRANSPARENT_LEFT_X, MIN_Y + TRANSPARENT_TOP_Y, MAX_X - TRANSPARENT_RIGHT_X, MAX_Y - TRANSPARENT_TOTAL_Y).attr({'fill':'white'});            
+            
+            //creación de la leyenda en el canvas
+            var weightLegend = paper.circle(20,20,6).attr({'fill':'#0000CC'});
+            var weightLegendText = paper.text(35,20,i18n.t('vector.weightForce')).attr({'fill':'#0000CC', 'text-anchor': 'start', "font-weight": "bold"});
+            var frictionLegend = paper.circle(20,40,6).attr({'fill':'#CC0000'});
+            var frictionLegendText = paper.text(35,40,i18n.t('vector.frictionForce')).attr({'fill':'#CC0000', 'text-anchor': 'start', "font-weight": "bold"});
+            var normalLegend = paper.circle(20,60,6).attr({'fill':'#008800'});
+            var normalLegendText = paper.text(35,60,i18n.t('vector.normalForce')).attr({'fill':'#008800', 'text-anchor': 'start', "font-weight": "bold"});
+            var extraForceLegend = paper.circle(20,80,6).attr({'fill':'#AA33AA'});
+            var extraForceLegendText = paper.text(35,80,i18n.t('vector.extraForce')).attr({'fill':'#AA33AA', 'text-anchor': 'start', "font-weight": "bold"});
+            var totalLegend = paper.circle(20,100,6).attr({'fill':'black'});
+            var totalLegendText = paper.text(35,100,i18n.t('vector.total')).attr({'fill':'black', 'text-anchor': 'start', "font-weight": "bold"});
+            //var weightDecompositionLegend = paper.circle(20,120,6).attr({'fill':'dodgerBlue'});
+            //var weightDecompositionLegendText = paper.text(35,120,i18n.t('vector.weightDecomposition')).attr({'fill':'dodgerBlue', 'text-anchor': 'start', "font-weight": "bold"});
+            var weightXLegend = paper.circle(20,120,6).attr({'fill':'dodgerBlue'});
+            var weightXLegendText = paper.text(35,120,i18n.t('vector.weightForce_X')).attr({'fill':'dodgerBlue', 'text-anchor': 'start', "font-weight": "bold"});
+            var weightYLegend = paper.circle(20,140,6).attr({'fill':'dodgerBlue'});
+            var weightYLegendText = paper.text(35,140,i18n.t('vector.weightForce_Y')).attr({'fill':'dodgerBlue', 'text-anchor': 'start', "font-weight": "bold"});        
+            
+            //creación de la estructura de la pendiente
+            //var bottomStructureLine = paper.path('M50 450L450 450').attr({'stroke':'black','stroke-width':'3'});
+            //var inclinedStructureLinePath = getInclinedStraight(50, 450, pitch);
+            //var inclinedStructureLine = paper.path(inclinedStructureLinePath).attr({'stroke':'black','stroke-width':'3'})
+            var inclinedAreaPath = getInclinedStructurePath(50, 450, pitch);
+            var inclinedArea = paper.path(inclinedAreaPath).attr({'fill':"url('./img/piedraTextura.jpg')",'stroke':'black','stroke-width':'3','opacity':'0.7'});          
+            
+            
+            //creación del objeto
+            var objectRect = paper.rect(0, 0, OBJECT_WIDTH, OBJECT_HEIGHT).attr({'fill':'120-#999-#fff','opacity':'0.8'});
+            var objectCenter = paper.circle(0, 0, 6).attr({'fill':'black'});
+            updateObjectRect(50, 450, pitch);         
+            
+            //creacion del texto informativo para los vectores en el lienzo
+            var weightVectorText = paper.text(0,0,"").attr({'fill':'#0000CC','font-size':'14','font-family':'Times','font-weight':'normal'});            
+            var weightVectorXText = paper.text(0,0,"").attr({'fill':'dodgerBlue','font-size':'14','font-family':'Times','font-weight':'normal'});            
+            var weightVectorYText = paper.text(0,0,"").attr({'fill':'dodgerBlue','font-size':'14','font-family':'Times','font-weight':'normal'});            
+            var frictionVectorText = paper.text(0,0,"").attr({'fill':'#CC0000','font-size':'14','font-family':'Times','font-weight':'normal'});
+            var normalVectorText = paper.text(0,0,"").attr({'fill':'#008800','font-size':'14','font-family':'Times','font-weight':'normal'});
+            var extraForceText = paper.text(0,0,"").attr({'fill':'#AA33AA','font-size':'14','font-family':'Times','font-weight':'normal'});
+            var totalVectorText = paper.text(0,0,"").attr({'fill':'black','font-size':'14','font-family':'Times','font-weight':'normal'});    
+            
+            //creación de los grid de resultados
+            createResultGrids();                                                           
+            
+            //inicialización de los controles            
+            initControls();
+        </script>
+             
+    </body>
+</html>

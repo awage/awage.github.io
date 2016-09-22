@@ -1,0 +1,29 @@
+{ 
+    "title": {
+        "mainTitle": "Principe d'Archimède",
+        "smallTitle": "Loi de Poussée"                
+    },
+    "controls": {
+        "objMass": "Masse de l'objet",
+        "objVolume": "Volume de l'objet",
+        "fluidDensity": "Densité du fluide"
+    },
+    "grid": {
+        "weightForceGridTitle" : "Résultats de poids",             
+        "weightForce": "Force de poids(N)",
+        "thrustForce": "Force de poussée(N)",
+        "totalForce": "Force totale(N)",  
+        "densityGridTitle" : "Résultats de densité",                        
+        "objDensity": "Densité de l'objet(kg/m<sup>3</sup>)",
+        "fluidDensity": "Densité du fluide(kg/m<sup>3</sup>)",
+        "volumeGridTitle" : "Résultats de volume",                         
+        "emergedVolume": "Volume émergé(m<sup>3</sup>)",
+        "submergedVolume": "Volume trempé(m<sup>3</sup>)",
+        "totalVolume": "Volume totale(m<sup>3</sup>)"
+    },
+    "vector": {
+        "weightForce": "Poids",
+        "thrustForce": "Poussée",
+        "totalForce": "Totale"        
+    }
+}     

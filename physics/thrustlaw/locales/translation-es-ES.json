@@ -1,0 +1,29 @@
+{
+    "title": {
+        "mainTitle": "Principio de Arquímedes",
+        "smallTitle": "Ley del Empuje"                
+    },
+    "controls": {
+        "objMass": "Masa del objeto",
+        "objVolume": "Volumen del objeto",
+        "fluidDensity": "Densidad del fluido"
+    },
+    "grid": {
+        "weightForceGridTitle" : "Resultados de peso",             
+        "weightForce": "Peso(N)",
+        "thrustForce": "Fuerza de empuje(N)",
+        "totalForce": "Fuerza total(N)",  
+        "densityGridTitle" : "Resultados de densidad",                        
+        "objDensity": "Densidad del objeto(kg/m<sup>3</sup>)",
+        "fluidDensity": "Densidad del fluido(kg/m<sup>3</sup>)",
+        "volumeGridTitle" : "Resultados de volumen",                         
+        "emergedVolume": "Volumen emergido(m<sup>3</sup>)",
+        "submergedVolume": "Volumen sumergido(m<sup>3</sup>)",
+        "totalVolume": "Volumen total(m<sup>3</sup>)"
+    },
+    "vector": {
+        "weightForce": "Peso",
+        "thrustForce": "Empuje",
+        "totalForce": "Total"        
+    }
+}

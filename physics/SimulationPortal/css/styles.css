@@ -1,0 +1,56 @@
+html {
+   min-height: 100%;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;    
+    
+    background: -moz-linear-gradient(top,  rgba(147,147,147,0.78) 0%, rgba(152,152,152,0.78) 10%, rgba(168,168,168,0.27) 42%, rgba(196,196,196,0.14) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(147,147,147,0.78)), color-stop(10%,rgba(152,152,152,0.78)), color-stop(42%,rgba(168,168,168,0.27)), color-stop(100%,rgba(196,196,196,0.14))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(147,147,147,0.78) 0%,rgba(152,152,152,0.78) 10%,rgba(168,168,168,0.27) 42%,rgba(196,196,196,0.14) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(147,147,147,0.78) 0%,rgba(152,152,152,0.78) 10%,rgba(168,168,168,0.27) 42%,rgba(196,196,196,0.14) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(147,147,147,0.78) 0%,rgba(152,152,152,0.78) 10%,rgba(168,168,168,0.27) 42%,rgba(196,196,196,0.14) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(147,147,147,0.78) 0%,rgba(152,152,152,0.78) 10%,rgba(168,168,168,0.27) 42%,rgba(196,196,196,0.14) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c7939393', endColorstr='#24c4c4c4',GradientType=0 ); /* IE6-9 */
+}
+
+.hideElement {
+    display: none;
+}
+
+.showElement {
+    display: inline-block;
+}
+
+#applicationsCarousel {
+    width: 800px;
+    height: 310px;
+    /*background: #ffffff;*/
+    overflow: scroll;
+    margin: 0px auto 0px auto;    
+    background-image: url(../img/carousel/transparentWallpaper.png);
+    background-repeat: repeat;
+    background-position: center;
+}
+
+#titleTextCarousel {
+    font-size: 14pt;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+#leftButtonCarousel {
+    margin-right: 10px;
+}
+
+#rightButtonCarousel {
+    margin-left: 10px;
+}
+
+#underConstruction img {
+    height: 40%;
+    width: 60%;
+}

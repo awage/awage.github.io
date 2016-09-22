@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Thrust Law</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <link rel="shortcut icon" href="img/urjc.ico" />
+
+        <!-- Estilos propios -->
+        <link href="css/styles.css" rel="stylesheet">
+        <link href="css/pagePeel.css" rel="stylesheet">
+        <!-- Estilos bootstrap -->
+        <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap/bootstrap-responsive.min.css" rel="stylesheet">
+        <!-- Estilos jquery -->
+        <link href="css/jquery/slider/jquery.slider.min.css" rel="stylesheet">
+        <link href="css/jquery/jqgrid/ui.jqgrid.css" rel="stylesheet">
+        <link href="css/jquery/jquery-ui/custom/jquery-ui.custom.min.css" rel="stylesheet">
+
+        <!-- Scripts propios -->
+        <script src="js/constants.js"></script>
+        <script src="js/controls.js"></script>
+        <script src="js/grid.js"></script>
+        <script src="js/movement.js"></script>
+        <script src="js/languajeSelector.js"></script>
+        <script src="js/locales.js"></script>
+        <script src="js/pagePeel.js"></script>
+        <script src="js/physicsCalculations.js"></script>
+        <script src="js/state.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/vectors.js"></script>
+        <!-- Scripts bootstrap -->
+        <script src="js/libs/bootstrap/bootstrap.min.js"></script>
+        <!-- Scripts jquery -->
+        <script src="js/libs/jquery/jquery.min.js"></script>
+        <script src="js/libs/jquery/jquery-migrate.js"></script>
+        <script src="js/libs/jquery/slider/jquery.slider.min.js"></script>
+        <script src="js/libs/jquery/jqgrid/js/jquery.jqGrid.min.js"></script>
+        <!-- Scripts raphael -->
+        <script src="js/libs/raphael/raphael-src.js"></script>
+        <!-- Scripts i18next -->
+        <script src="js/libs/i18next/i18next.min.js"></script>                 
+        
+    </head>
+	
+    <body>       
+  
+        <div id="wrap">
+            <div id='pageflip'>
+                <img id="pageFlipImg" src="img/pagePeel.png" />
+                <div id="pageFlipMsg" class="msg_block"/>
+                </div>
+            </div>   
+            
+            <div id="languageSelector">
+                <a href="#" onclick="loadSpanishLanguage();">
+                    <img src="img/flags/spanishFlag.png" width="32" height="32" title="Castellano" alt="Castellano"/>
+                </a>
+                <br>
+                <a href="#" onclick="loadEnglishLanguage();">
+                    <img src="img/flags/englishFlag.png" width="32" height="32" title="English" alt="English"/>
+                </a>
+                <br>
+                <a href="#" onclick="loadFrenchLanguage();">
+                    <img src="img/flags/frenchFlag.png" width="32" height="32" title="Française" alt="Française"/>
+                </a>      
+                <br>
+                <a href="#" onclick="loadItalianLanguage();">
+                    <img src="img/flags/italianFlag.png" width="32" height="32" title="Italiano" alt="Italiano"/>
+                </a>                
+            </div>
+            
+            <div class="container">                            
+                <div id="maincontent">
+                    <div id='maintext'>
+                        <div class='row'>
+                            <div class='span10'>
+                                <div class="page-header">
+                                    <h2>
+                                        <span id="appMainTitle" data-i18n="title.mainTitle"></span>
+                                        <br>
+                                        <small id="appSmallTitle" data-i18n="title.smallTitle"></small>
+                                    </h2>
+                                </div>
+                            </div>	
+                        </div>
+
+                        <div class='row'>
+                            <div id="raphaelCanvasEnvelope" class='span5'>
+                                <div id="raphaelCanvas">  
+                                </div>
+                            </div>
+
+                            <div class="span7">
+                                <div class="control-group">
+                                    <div id="controlsDiv" class="controls span7">
+                                        <label class="entryControl"><span class="sliderSpan"><input id="objMass" type="slider" name="objMass" value = "500" /></span><span data-i18n="controls.objMass"></span></label>
+                                        <br>
+                                        <label class="entryControl"><span class="sliderSpan"><input id="objVolume" type="slider" name="objVolume" value = "0.75" /></span><span data-i18n="controls.objVolume"></span></label>
+                                        <br>
+                                        <label class="entryControl"><span class="sliderSpan"><input id="fluidDensity" type="slider" name="fluidDensity" value = "1000" /></span><span data-i18n="controls.fluidDensity"></span></label>             
+                                        
+                                        <div class="topGrid">
+                                            <table id="forceGrid"></table>
+                                        </div>
+
+                                        <div class="normalGrid">
+                                            <table id="densityGrid"></table>
+                                        </div>       
+                                        
+                                        <div class="normalGrid">
+                                            <table id="volumeGrid"></table>
+                                        </div>                                           
+                                    </div>                                                                          
+                                </div>                                                            
+                            </div>
+                        </div> 
+                    </div>
+                </div>     
+            </div>   
+        </div>
+
+        <script>
+            $(document).ready(function(){
+        
+                //creación del efecto page peel
+                createPagePeelEffect();
+            });
+        </script>
+        
+        <script>	
+            //inicializacion de variables globales
+            var weightForce;
+            var thrustForce;
+            var totalForce;
+            var objDensity;
+            var fluidDensity = DEFAULT_FLUID_DENSITY;
+            var emergedVolume;
+            var submergedVolume;
+            var animationInProgress = false;            
+            var objectSubmerged = false;
+            var previousObjectSubmerged;
+
+            //inicialización de los vectores
+            var weightVector = null;
+            var thrustVector = null;
+            var totalVector = null;
+
+            //i18n
+            i18n.init({lng: 'es-ES', resStore: locales})
+                .done(function(){
+                    $("#wrap").i18n();
+                }
+            );
+
+            //creación del marco de Raphael y borde del marco
+            var paper = Raphael(document.getElementById("raphaelCanvas"), MAX_X, MAX_Y);
+            var sqr = paper.rect(MIN_X, MIN_Y + TRANSPARENT_TOP_Y, MAX_X, MAX_Y - TRANSPARENT_TOTAL_Y).attr({'fill':'white'});
+
+            //creación del fluido
+            var fluidSqr = paper.rect(MIN_X, OBJECT_CENTER_Y, MAX_X, 200).attr({'fill':"url('./img/waterTexture.jpg')",'opacity':0.4});
+
+            //creación del objeto a examinar (círculo)
+            var c1 = paper.circle(OBJECT_CENTER_X, OBJECT_CENTER_Y, 68).attr({'fill':'r(0.75, 0.25)#fff-#f00','stroke-width':'0'});
+
+            //creación del origen de los vectores(en el centro del objeto a examinar)
+            var vectorCenter = paper.circle(OBJECT_CENTER_X, OBJECT_CENTER_Y, 6).attr({'fill':'black'});
+
+            //creacion del texto informativo para los vectores en el lienzo
+            var weightVectorText = paper.text(0,0,"").attr({'fill':'blue','font-size':'14','font-family':'Times','font-weight':'normal'});
+            var thrustVectorText = paper.text(0,0,"").attr({'fill':'darkGreen','font-size':'14','font-family':'Times','font-weight':'normal'});
+            var totalVectorText = paper.text(0,0,"").attr({'fill':'black','font-size':'14','font-family':'Times','font-weight':'normal'});
+
+            //manejo del evento drag&drop 
+            //c1.drag(move_dr,start_dr,up_dr);
+
+            //fijados los valores por defecto del objeto a examinar
+            c1.mass = DEFAULT_OBJ_MASS;
+            c1.volume = DEFAULT_OBJ_VOLUME; 
+            c1.attr({'opacity': 0.8});
+
+            //superposicion de los elementos del lienzo
+            c1.toFront();
+            fluidSqr.toFront();
+            vectorCenter.toFront();
+            weightVectorText.toFront();
+            thrustVectorText.toFront();
+            totalVectorText.toFront(); 
+
+            //creación de los grid de resultados
+            createResultGrids();                                               
+
+            //inicialización de los controles
+            initControls();
+                       
+        </script>  
+
+    </body>
+	
+</html>

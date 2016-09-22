@@ -1,0 +1,29 @@
+{
+    "title": {
+        "mainTitle": "Archimedes' Principle",
+        "smallTitle": "Thrust Law"
+    },
+    "controls": {
+        "objMass": "Object mass",
+        "objVolume": "Object volume",
+        "fluidDensity": "Fluid density"
+    },
+    "grid": {
+        "weightForceGridTitle" : "Weight force results",              
+        "weightForce": "Weight force(N)",
+        "thrustForce": "Thrust force(N)",
+        "totalForce": "Total force(N)",  
+        "densityGridTitle" : "Density results",                      
+        "objDensity": "Object density(kg/m<sup>3</sup>)",
+        "fluidDensity": "Fluid density(kg/m<sup>3</sup>)",
+        "volumeGridTitle" : "Volume results",                      
+        "emergedVolume": "Emerged volume(m<sup>3</sup>)",
+        "submergedVolume": "Submerged volume(m<sup>3</sup>)",
+        "totalVolume": "Total Volume(m<sup>3</sup>)"
+    },    
+    "vector": {
+        "weightForce": "Weight",
+        "thrustForce": "Thrust",
+        "totalForce": "Total"        
+    }          
+}
