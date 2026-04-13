@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Displaced Click Trainer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111827;
+      color: #f3f4f6;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #f9fafb;
+    }
+
+    h1 span { color: #f97316; }
+
+    /* ── Controls grid ─────────────────────────── */
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    @media (min-width: 540px) {
+      .controls { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .ctrl {
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 1.1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .ctrl label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    .ctrl .val {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .ctrl.bpm  .val { color: #60a5fa; }
+    .ctrl.onb  .val { color: #34d399; }
+    .ctrl.disb .val { color: #f97316; }
+    .ctrl.disp .val { color: #a78bfa; }
+    .ctrl.sil  .val { color: #6b7280; }
+
+    .ctrl-btns {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+
+    .ctrl-btns button {
+      flex: 1;
+      background: #374151;
+      color: #d1d5db;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      line-height: 1;
+      padding: 0.4rem 0;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      user-select: none;
+    }
+
+    .ctrl-btns button:hover  { background: #4b5563; color: #f9fafb; }
+    .ctrl-btns button:active { background: #6b7280; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #374151;
+      outline: none;
+      cursor: pointer;
+      margin-top: 0.4rem;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #60a5fa;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { background: #93c5fd; }
+
+    /* ── Main display ──────────────────────────── */
+    .display {
+      width: 100%;
+      max-width: 640px;
+      background: #1f2937;
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    /* Phase badge */
+    .phase-badge {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.45rem 1.4rem;
+      border-radius: 99px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .phase-badge.on-time {
+      background: #1e3a5f;
+      color: #60a5fa;
+    }
+    .phase-badge.displaced {
+      background: #431407;
+      color: #fb923c;
+    }
+    .phase-badge.silent {
+      background: #1c1f26;
+      color: #6b7280;
+    }
+    .phase-badge.idle {
+      background: #374151;
+      color: #9ca3af;
+    }
+
+    /* Beat dots */
+    .beat-row {
+      display: flex;
+      gap: 1.2rem;
+    }
+
+    .dot {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #374151;
+      transition: background 0.04s, transform 0.04s;
+    }
+    .dot.accent { background: #374151; }
+    .dot.flash-on  { background: #60a5fa; transform: scale(1.15); }
+    .dot.flash-off { background: #f97316; transform: scale(1.15); }
+
+    /* Cycle bar map */
+    .cycle-row {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .bar-block {
+      height: 18px;
+      min-width: 24px;
+      border-radius: 4px;
+      transition: opacity 0.1s;
+      position: relative;
+    }
+    .bar-block.on-time   { background: #1d4ed8; }
+    .bar-block.displaced { background: #c2410c; }
+    .bar-block.silent    { background: #374151; }
+    .bar-block.current::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border: 2px solid #f3f4f6;
+      border-radius: 5px;
+    }
+    .bar-block.past { opacity: 0.35; }
+
+    /* Displacement description */
+    .disp-desc {
+      font-size: 0.82rem;
+      color: #9ca3af;
+      text-align: center;
+    }
+    .disp-desc strong { color: #a78bfa; }
+
+    /* ── Start / Stop ──────────────────────────── */
+    #startBtn {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 0.85rem 3rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.04em;
+    }
+    #startBtn:hover  { background: #1d4ed8; transform: scale(1.04); }
+    #startBtn.stop   { background: #dc2626; }
+    #startBtn.stop:hover { background: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Displaced <span>Click</span> Trainer</h1>
+
+  <div class="controls">
+    <div class="ctrl bpm">
+      <label>BPM</label>
+      <div class="val" id="bpmVal">120</div>
+      <input type="range" id="bpmSlider" min="40" max="240" value="120">
+      <div class="ctrl-btns">
+        <button onclick="adj('bpm',-1)">−</button>
+        <button onclick="adj('bpm',+1)">+</button>
+      </div>
+    </div>
+    <div class="ctrl onb">
+      <label>On‑Time Bars</label>
+      <div class="val" id="onBarsVal">4</div>
+      <div class="ctrl-btns">
+        <button onclick="adj('onBars',-1)">−</button>
+        <button onclick="adj('onBars',+1)">+</button>
+      </div>
+    </div>
+    <div class="ctrl disb">
+      <label>Displaced Bars</label>
+      <div class="val" id="offBarsVal">4</div>
+      <div class="ctrl-btns">
+        <button onclick="adj('offBars',-1)">−</button>
+        <button onclick="adj('offBars',+1)">+</button>
+      </div>
+    </div>
+    <div class="ctrl disp">
+      <label>Displacement</label>
+      <div class="val" id="dispVal">+1</div>
+      <div class="ctrl-btns">
+        <button onclick="adj('disp',-1)">−</button>
+        <button onclick="adj('disp',+1)">+</button>
+      </div>
+    </div>
+    <div class="ctrl sil">
+      <label>Silent Bars</label>
+      <div class="val" id="silBarsVal">0</div>
+      <div class="ctrl-btns">
+        <button onclick="adj('silent',-1)">−</button>
+        <button onclick="adj('silent',+1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="display">
+    <div class="phase-badge idle" id="phaseBadge">— STOPPED —</div>
+
+    <div class="beat-row">
+      <div class="dot accent" id="d0"></div>
+      <div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+    </div>
+
+    <div class="cycle-row" id="cycleRow"></div>
+
+    <div class="disp-desc" id="dispDesc">
+      Displaced click: <strong>+1 sixteenth note late</strong>
+    </div>
+  </div>
+
+  <button id="startBtn">▶ Start</button>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let audioCtx = null;
+let playing   = false;
+let timerID   = null;
+
+let bpm         = 120;
+let onTimeBars  = 4;
+let dispBars    = 4;
+let dispSteps   = 1;   // 16th note steps, can be negative
+let silentBars  = 0;
+
+// Scheduler counters
+let nextBeatTime = 0;
+let schedBeat    = 0;
+let schedBar     = 0;
+
+// Queue of events for the visual loop
+// Each item: { baseTime, clickTime, beat, bar, displaced }
+const queue = [];
+
+const LOOKAHEAD_MS   = 25;
+const SCHEDULE_AHEAD = 0.15;  // seconds
+
+// ── Controls ─────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+$('bpmSlider').addEventListener('input', e => {
+  bpm = +e.target.value;
+  $('bpmVal').textContent = bpm;
+});
+
+function adj(param, delta) {
+  if (param === 'bpm') {
+    bpm = Math.max(40, Math.min(240, bpm + delta));
+    $('bpmVal').textContent = bpm;
+    $('bpmSlider').value = bpm;
+  } else if (param === 'onBars') {
+    onTimeBars = Math.max(1, Math.min(16, onTimeBars + delta));
+    $('onBarsVal').textContent = onTimeBars;
+    buildCycleRow();
+  } else if (param === 'offBars') {
+    dispBars = Math.max(0, Math.min(16, dispBars + delta));
+    $('offBarsVal').textContent = dispBars;
+    buildCycleRow();
+  } else if (param === 'disp') {
+    dispSteps = Math.max(-3, Math.min(3, dispSteps + delta));
+    const s = dispSteps >= 0 ? '+' : '';
+    $('dispVal').textContent = s + dispSteps;
+    updateDispDesc();
+  } else if (param === 'silent') {
+    silentBars = Math.max(0, Math.min(16, silentBars + delta));
+    $('silBarsVal').textContent = silentBars;
+    buildCycleRow();
+  }
+}
+
+$('startBtn').addEventListener('click', () => playing ? stop() : start());
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const beatDur   = () => 60 / bpm;
+const sixteenth = () => beatDur() / 4;
+
+function getPhase(bar) {
+  const total = onTimeBars + dispBars + silentBars;
+  const pos   = bar % total;
+  if (pos < onTimeBars)                  return 'on-time';
+  if (pos < onTimeBars + dispBars)       return 'displaced';
+  return 'silent';
+}
+
+function updateDispDesc() {
+  const s = dispSteps;
+  let text;
+  if (s === 0)       text = 'Displacement: <strong>none (same as on‑time)</strong>';
+  else if (s === 1)  text = 'Displaced click: <strong>+1 sixteenth note late</strong>';
+  else if (s === -1) text = 'Displaced click: <strong>1 sixteenth note early</strong>';
+  else if (s > 0)    text = `Displaced click: <strong>+${s} sixteenth notes late</strong>`;
+  else               text = `Displaced click: <strong>${Math.abs(s)} sixteenth notes early</strong>`;
+  $('dispDesc').innerHTML = text;
+}
+
+// ── Audio ────────────────────────────────────────────────────────────────────
+function click(t, displaced) {
+  const osc  = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.frequency.value = displaced ? 800 : 1000;
+
+  gain.gain.setValueAtTime(0.6, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+  osc.start(t);
+  osc.stop(t + 0.055);
+}
+
+// ── Scheduler ─────────────────────────────────────────────────────────────────
+function schedule() {
+  if (!playing) return;
+
+  const negBuf = dispSteps < 0 ? Math.abs(dispSteps) * sixteenth() : 0;
+  while (nextBeatTime < audioCtx.currentTime + SCHEDULE_AHEAD + negBuf) {
+    const bar   = schedBar;
+    const beat  = schedBeat;
+    const phase = getPhase(bar);
+    const base  = nextBeatTime;
+    const clickT = phase === 'displaced' ? base + dispSteps * sixteenth() : base;
+
+    if (phase !== 'silent') {
+      click(clickT, phase === 'displaced');
+    }
+
+    queue.push({ baseTime: base, clickTime: clickT, beat, bar, phase });
+
+    schedBeat++;
+    if (schedBeat >= 4) { schedBeat = 0; schedBar++; }
+    nextBeatTime += beatDur();
+  }
+
+  timerID = setTimeout(schedule, LOOKAHEAD_MS);
+}
+
+// ── Visual loop ──────────────────────────────────────────────────────────────
+// Track which event last updated the display
+let lastBaseBar  = -1;
+let lastBaseBar2 = -1;   // bar position within cycle for the cycle row
+
+function visualLoop() {
+  if (!playing) return;
+
+  const now = audioCtx.currentTime;
+
+  for (const ev of queue) {
+    // On base beat: update phase badge + cycle row
+    if (!ev.baseDone && ev.baseTime <= now) {
+      ev.baseDone = true;
+      updatePhase(ev);
+    }
+    // On click time: flash dot
+    if (!ev.clickDone && ev.clickTime <= now) {
+      ev.clickDone = true;
+      flashDot(ev);
+    }
+  }
+
+  // Prune old entries
+  while (queue.length > 0 && queue[0].baseDone && queue[0].clickDone
+         && queue[0].baseTime < now - 1) {
+    queue.shift();
+  }
+
+  requestAnimationFrame(visualLoop);
+}
+
+// ── Visuals ──────────────────────────────────────────────────────────────────
+function flashDot(ev) {
+  if (ev.phase === 'silent') return;
+  const dot = $('d' + ev.beat);
+  if (!dot) return;
+  const cls = ev.phase === 'displaced' ? 'flash-off' : 'flash-on';
+  dot.classList.add(cls);
+  setTimeout(() => dot.classList.remove(cls), 120);
+}
+
+function updatePhase(ev) {
+  const badge = $('phaseBadge');
+  if (ev.phase === 'displaced') {
+    const s = dispSteps >= 0 ? '+' : '';
+    badge.textContent = `DISPLACED  ${s}${dispSteps} / 16`;
+    badge.className = 'phase-badge displaced';
+  } else if (ev.phase === 'silent') {
+    badge.textContent = 'SILENT';
+    badge.className = 'phase-badge silent';
+  } else {
+    badge.textContent = 'ON TIME';
+    badge.className = 'phase-badge on-time';
+  }
+  updateCycleRow(ev.bar);
+}
+
+function buildCycleRow() {
+  const row = $('cycleRow');
+  row.innerHTML = '';
+  const total = onTimeBars + dispBars + silentBars;
+  for (let i = 0; i < total; i++) {
+    const b = document.createElement('div');
+    if (i < onTimeBars)                b.className = 'bar-block on-time';
+    else if (i < onTimeBars + dispBars) b.className = 'bar-block displaced';
+    else                                b.className = 'bar-block silent';
+    b.id = 'cb' + i;
+    row.appendChild(b);
+  }
+}
+
+function updateCycleRow(bar) {
+  const total = onTimeBars + dispBars + silentBars;
+  const pos   = bar % total;
+  for (let i = 0; i < total; i++) {
+    const b = $('cb' + i);
+    if (!b) continue;
+    b.classList.toggle('current', i === pos);
+    b.classList.toggle('past',    i < pos);
+  }
+}
+
+// ── Start / Stop ─────────────────────────────────────────────────────────────
+function start() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  playing      = true;
+  schedBeat    = 0;
+  schedBar     = 0;
+  const negBuf = dispSteps < 0 ? Math.abs(dispSteps) * (60 / bpm / 4) : 0;
+  nextBeatTime = audioCtx.currentTime + 0.08 + negBuf;
+  queue.length = 0;
+
+  $('startBtn').textContent = '■ Stop';
+  $('startBtn').classList.add('stop');
+
+  buildCycleRow();
+  schedule();
+  visualLoop();
+}
+
+function stop() {
+  playing = false;
+  clearTimeout(timerID);
+  timerID = null;
+  queue.length = 0;
+
+  $('startBtn').textContent = '▶ Start';
+  $('startBtn').classList.remove('stop');
+
+  $('phaseBadge').textContent = '— STOPPED —';
+  $('phaseBadge').className   = 'phase-badge idle';
+
+  // Clear dot flashes
+  for (let i = 0; i < 4; i++) {
+    const d = $('d' + i);
+    d.classList.remove('flash-on', 'flash-off');
+  }
+  // Clear cycle highlights
+  document.querySelectorAll('.bar-block').forEach(b =>
+    b.classList.remove('current', 'past')
+  );
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+buildCycleRow();
+updateDispDesc();
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Metronome</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif; /* A more common sans-serif font */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #fcfcfc; /* A very light, almost white background */
+      position: relative; /* Needed for ::before positioning */
+      overflow: hidden; /* Prevents scrollbars if pseudo-element slightly overflows */
+    }
+
+    /* Pink Hearts Background Decoration */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* SVG Heart as data URI - a scalable, pink heart */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffc0cb' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+      background-size: 80px 80px; /* Size of each heart image */
+      background-repeat: repeat; /* Repeat the hearts across the background */
+      opacity: 0.15; /* Make them subtle */
+      z-index: -1; /* Place it behind the main content */
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+      position: relative; /* Ensure it's above the hearts */
+      z-index: 1;
+    }
+
+    #controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 30px;
+      border-radius: 15px;
+      background-color: rgba(255, 255, 255, 0.95); /* Slightly opaque white background for readability */
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+      position: relative; /* Ensure it's above the hearts */
+      z-index: 1;
+    }
+
+    #bpm-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px; /* Space between buttons and BPM display */
+      margin-bottom: 20px;
+    }
+
+    #bpm-controls button {
+      padding: 10px 20px;
+      font-size: 1.5em;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f0f0f0;
+      color: #555;
+      transition: all 0.2s ease;
+      min-width: 50px; /* Ensure buttons have a consistent width */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #bpm-controls button:hover {
+      background-color: #e0e0e0;
+      border-color: #ccc;
+      color: #333;
+      transform: translateY(-2px); /* Slight lift on hover */
+    }
+
+    #bpm-display {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #333;
+      min-width: 120px; /* Give space for BPM text */
+      text-align: center;
+    }
+
+    #bpm-display span {
+      color: #e91e63; /* Pink accent for BPM number */
+    }
+
+    #slider-container {
+      width: 300px;
+      margin-bottom: 25px;
+    }
+
+    #bpm-slider {
+      width: 100%;
+      -webkit-appearance: none; /* Remove default slider styles */
+      height: 10px;
+      background: #e0e0e0;
+      outline: none;
+      border-radius: 5px;
+      opacity: 0.9;
+      transition: opacity 0.2s;
+    }
+
+    #bpm-slider:hover {
+      opacity: 1;
+    }
+
+    #bpm-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #e91e63; /* Pink thumb */
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #bpm-slider::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #e91e63; /* Pink thumb */
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #start-stop {
+      padding: 15px 30px;
+      font-size: 1.5em;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50; /* Green for Start */
+      color: white;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #start-stop:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+    }
+
+    /* Style for the Stop state */
+    #start-stop[data-running="true"] {
+      background-color: #f44336; /* Red for Stop */
+    }
+
+    #start-stop[data-running="true"]:hover {
+      background-color: #da190b;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Metronome</h1>
+
+  <div id="controls">
+    <div id="bpm-controls">
+      <button id="decrease-bpm">-</button>
+      <div id="bpm-display">BPM: <span id="bpm">120</span></div>
+      <button id="increase-bpm">+</button>
+    </div>
+
+    <div id="slider-container">
+      <input type="range" id="bpm-slider" min="40" max="200" value="120">
+    </div>
+
+    <button id="start-stop">Start</button>
+  </div>
+
+
+  <script>
+    let bpm = 120;
+    let isRunning = false;
+    let timer;
+    // Use AudioContext with fallback for broader browser support
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    const bpmDisplay = document.getElementById('bpm');
+    const bpmSlider = document.getElementById('bpm-slider');
+    const startStopButton = document.getElementById('start-stop');
+    const increaseBpmButton = document.getElementById('increase-bpm');
+    const decreaseBpmButton = document.getElementById('decrease-bpm');
+
+    function playClick() {
+      // Create oscillator
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.type = 'square'; // A clear, punchy sound
+      oscillator.frequency.setValueAtTime(540, audioContext.currentTime); // A common metronome click pitch
+
+      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Initial volume
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.05); // Quick fade out
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.05);
+    }
+
+    // Function to update BPM and re-start metronome if it's running
+    function updateBpm(newBpm) {
+      // Ensure BPM stays within the slider's min/max range
+      const minBpm = parseInt(bpmSlider.min);
+      const maxBpm = parseInt(bpmSlider.max);
+      
+      newBpm = Math.max(minBpm, Math.min(maxBpm, newBpm));
+
+      if (newBpm !== bpm) { // Only update if BPM has actually changed
+        bpm = newBpm;
+        bpmDisplay.textContent = bpm;
+        bpmSlider.value = bpm; // Keep the slider in sync
+
+        if (isRunning) {
+          // If metronome is running, stop it and restart with the new BPM
+          stopMetronome();
+          startMetronome();
+        }
+      }
+    }
+
+    function startMetronome() {
+      if (!isRunning) {
+        // Ensure AudioContext is in 'running' state, especially on user interaction
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        isRunning = true;
+        startStopButton.textContent = 'Stop';
+        startStopButton.setAttribute('data-running', 'true'); // For CSS styling
+        timer = setInterval(() => {
+          playClick();
+        }, 60000 / bpm); // Calculate interval based on BPM (milliseconds per beat)
+      } else {
+        stopMetronome();
+      }
+    }
+
+    function stopMetronome() {
+      isRunning = false;
+      startStopButton.textContent = 'Start';
+      startStopButton.removeAttribute('data-running'); // Remove for CSS styling
+      clearInterval(timer);
+    }
+
+    // Event Listeners
+
+    // Slider input to change BPM
+    bpmSlider.addEventListener('input', () => {
+      updateBpm(parseInt(bpmSlider.value));
+    });
+
+    // Plus button to increase BPM
+    increaseBpmButton.addEventListener('click', () => {
+      updateBpm(bpm + 1);
+    });
+
+    // Minus button to decrease BPM
+    decreaseBpmButton.addEventListener('click', () => {
+      updateBpm(bpm - 1);
+    });
+
+    // Start/Stop button
+    startStopButton.addEventListener('click', startMetronome);
+
+    // Initial display update
+    bpmDisplay.textContent = bpm;
+
+  </script>
+</body>
+</html>
