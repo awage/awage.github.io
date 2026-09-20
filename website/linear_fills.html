@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linear Fills</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥁</text></svg>">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111827;
+      color: #f3f4f6;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #f9fafb;
+    }
+
+    h1 span { color: #ec4899; }
+    .home-link { position: absolute; top: 1rem; left: 1.2rem; color: #9ca3af; text-decoration: none; font-size: 0.9rem; }
+    .home-link:hover { color: #f3f4f6; }
+
+    /* ── Controls grid ─────────────────────────── */
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .ctrl {
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 1.1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .ctrl label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    .ctrl .val {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .ctrl.bpm  .val { color: #60a5fa; }
+    .ctrl.grv  .val { color: #34d399; }
+
+    .ctrl-btns {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+
+    .ctrl-btns button {
+      flex: 1;
+      background: #374151;
+      color: #d1d5db;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      line-height: 1;
+      padding: 0.4rem 0;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      user-select: none;
+    }
+
+    .ctrl-btns button:hover  { background: #4b5563; color: #f9fafb; }
+    .ctrl-btns button:active { background: #6b7280; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #374151;
+      outline: none;
+      cursor: pointer;
+      margin-top: 0.4rem;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #60a5fa;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { background: #93c5fd; }
+
+    /* ── Pattern Selector Panel ────────────────── */
+    .patterns-panel {
+      width: 100%;
+      max-width: 680px;
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .patterns-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+    .patterns-header button {
+      background: #374151;
+      color: #d1d5db;
+      border: none;
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .patterns-header button:hover { background: #4b5563; color: #fff; }
+
+    .pattern-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pat-tag {
+      background: #374151;
+      color: #9ca3af;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.12s;
+      border: 1px solid transparent;
+    }
+    .pat-tag:hover { background: #4b5563; color: #f3f4f6; }
+    .pat-tag.active {
+      background: #311026;
+      color: #f472b6;
+      border-color: #ec4899;
+    }
+
+    /* ── Main display ──────────────────────────── */
+    .display {
+      width: 100%;
+      max-width: 680px;
+      background: #1f2937;
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    /* Phase badge */
+    .phase-badge {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.45rem 1.4rem;
+      border-radius: 99px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .phase-badge.groove {
+      background: #064e3b;
+      color: #34d399;
+    }
+    .phase-badge.fill {
+      background: #500724;
+      color: #f472b6;
+    }
+    .phase-badge.idle {
+      background: #374151;
+      color: #9ca3af;
+    }
+
+    /* 16th Note Grid (16 dots) */
+    .grid-row {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 4px;
+      width: 100%;
+    }
+
+    .step-box {
+      aspect-ratio: 1;
+      background: #374151;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #9ca3af;
+      transition: transform 0.05s, background 0.05s, color 0.05s;
+      user-select: none;
+    }
+    .step-box.beat-start { border-left: 2px solid #6b7280; }
+
+    /* Flash states for visual guide */
+    .step-box.flash-Click { background: #34d399; color: #111827; transform: scale(1.15); }
+    .step-box.flash-R     { background: #a78bfa; color: #111827; transform: scale(1.15); }
+    .step-box.flash-L     { background: #ec4899; color: #111827; transform: scale(1.15); }
+    .step-box.flash-K     { background: #f97316; color: #111827; transform: scale(1.15); }
+
+    /* Cycle bar map */
+    .cycle-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .bar-block {
+      height: 18px;
+      min-width: 32px;
+      border-radius: 4px;
+      transition: opacity 0.1s;
+      position: relative;
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+    }
+    .bar-block.groove { background: #065f46; }
+    .bar-block.fill   { background: #831843; }
+    .bar-block.current::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border: 2px solid #f3f4f6;
+      border-radius: 5px;
+    }
+    .bar-block.past { opacity: 0.35; }
+
+    /* Large Announcement & Length Breakdown */
+    .announcement {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #facc15;
+      text-align: center;
+      min-height: 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+      letter-spacing: 0.02em;
+    }
+    .announcement .label-title {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .announcement .lengths-sub {
+      font-size: 1.4rem;
+      color: #60a5fa;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* ── Start / Stop Button ───────────────────── */
+    #startBtn {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 0.85rem 3rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.04em;
+    }
+    #startBtn:hover  { background: #1d4ed8; transform: scale(1.04); }
+    #startBtn.stop   { background: #dc2626; }
+    #startBtn.stop:hover { background: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="home-link">← Home</a>
+  <h1>Linear Fill <span>Trainer</span></h1>
+
+  <div class="controls">
+    <div class="ctrl bpm">
+      <label>BPM</label>
+      <div class="val" id="bpmVal">100</div>
+      <input type="range" id="bpmSlider" min="40" max="220" value="100">
+      <div class="ctrl-btns">
+        <button onclick="adj('bpm',-1)">−</button>
+        <button onclick="adj('bpm',+1)">+</button>
+      </div>
+    </div>
+    <div class="ctrl grv">
+      <label>Groove Bars</label>
+      <div class="val" id="grvBarsVal">3</div>
+      <div class="ctrl-btns">
+        <button onclick="adj('grvBars',-1)">−</button>
+        <button onclick="adj('grvBars',+1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="patterns-panel">
+    <div class="patterns-header">
+      <span>Active Linear Fill Building Blocks (<span id="activeCount">0</span> selected)</span>
+      <div>
+        <button onclick="selectAllPatterns(true)">All</button>
+        <button onclick="selectAllPatterns(false)">None</button>
+      </div>
+    </div>
+    <div class="pattern-tags" id="patternTags"></div>
+  </div>
+
+  <div class="display">
+    <div class="phase-badge idle" id="phaseBadge">— STOPPED —</div>
+
+    <div class="grid-row" id="gridRow">
+      <!-- 16 step boxes generated by JS -->
+    </div>
+
+    <div class="cycle-row" id="cycleRow"></div>
+
+    <div class="announcement" id="announcementText">
+      Press Start to begin training
+    </div>
+  </div>
+
+  <button id="startBtn">▶ Start</button>
+
+<script>
+// ── Master Pattern Library ───────────────────────────────────────────────────
+const MASTER_PATTERNS = [
+  { id: 'RLLK',     len: 4, seq: ['R', 'L', 'L', 'K'] },
+  { id: 'RLRK',     len: 4, seq: ['R', 'L', 'R', 'K'] },
+  { id: 'RLKK',     len: 4, seq: ['R', 'L', 'K', 'K'] },
+  { id: 'RRLK',     len: 4, seq: ['R', 'R', 'L', 'K'] },
+  { id: 'RLRLK',    len: 5, seq: ['R', 'L', 'R', 'L', 'K'] },
+  { id: 'RLLRK',    len: 5, seq: ['R', 'L', 'L', 'R', 'K'] },
+  { id: 'RLRKK',    len: 5, seq: ['R', 'L', 'R', 'K', 'K'] },
+  { id: 'RLRLLK',   len: 6, seq: ['R', 'L', 'R', 'L', 'L', 'K'] },
+  { id: 'RLRLKK',   len: 6, seq: ['R', 'L', 'R', 'L', 'K', 'K'] },
+  { id: 'RLLRLK',   len: 6, seq: ['R', 'L', 'L', 'R', 'L', 'K'] },
+  { id: 'RLRLRLLK', len: 8, seq: ['R', 'L', 'R', 'L', 'R', 'L', 'L', 'K'] },
+  { id: 'RLLRLRLK', len: 8, seq: ['R', 'L', 'L', 'R', 'L', 'R', 'L', 'K'] },
+  { id: 'RLRLKKRK', len: 8, seq: ['R', 'L', 'R', 'L', 'K', 'K', 'R', 'K'] }
+];
+
+let activePatternIds = new Set(MASTER_PATTERNS.map(p => p.id));
+
+// ── State ────────────────────────────────────────────────────────────────────
+let audioCtx = null;
+let playing   = false;
+let timerID   = null;
+
+let bpm         = 100;
+let grooveBars  = 3;
+
+let nextBeatTime = 0;
+let schedStep    = 0;
+let scheduledFillSequence = { notes: [], names: [], lengths: [] };
+
+const queue = [];
+const LOOKAHEAD_MS   = 25;
+const SCHEDULE_AHEAD = 0.15;
+
+const $ = id => document.getElementById(id);
+
+function initPatternTags() {
+  const container = $('patternTags');
+  container.innerHTML = '';
+  MASTER_PATTERNS.forEach(p => {
+    const tag = document.createElement('div');
+    tag.className = `pat-tag ${activePatternIds.has(p.id) ? 'active' : ''}`;
+    tag.textContent = `${p.id} (${p.len})`;
+    tag.onclick = () => {
+      if (activePatternIds.has(p.id)) {
+        if (activePatternIds.size > 1) {
+          activePatternIds.delete(p.id);
+          tag.classList.remove('active');
+        }
+      } else {
+        activePatternIds.add(p.id);
+        tag.classList.add('active');
+      }
+      updateActiveCount();
+    };
+    container.appendChild(tag);
+  });
+  updateActiveCount();
+}
+
+function updateActiveCount() {
+  $('activeCount').textContent = activePatternIds.size;
+}
+
+function selectAllPatterns(select) {
+  if (select) {
+    MASTER_PATTERNS.forEach(p => activePatternIds.add(p.id));
+  } else {
+    activePatternIds.clear();
+    activePatternIds.add(MASTER_PATTERNS[0].id);
+  }
+  initPatternTags();
+}
+
+function buildGridBoxes() {
+  const row = $('gridRow');
+  row.innerHTML = '';
+  for (let i = 0; i < 16; i++) {
+    const box = document.createElement('div');
+    box.className = 'step-box' + (i % 4 === 0 ? ' beat-start' : '');
+    box.id = 'sb' + i;
+    box.textContent = (i + 1);
+    row.appendChild(box);
+  }
+}
+
+$('bpmSlider').addEventListener('input', e => {
+  bpm = +e.target.value;
+  $('bpmVal').textContent = bpm;
+});
+
+function adj(param, delta) {
+  if (param === 'bpm') {
+    bpm = Math.max(40, Math.min(220, bpm + delta));
+    $('bpmVal').textContent = bpm;
+    $('bpmSlider').value = bpm;
+  } else if (param === 'grvBars') {
+    grooveBars = Math.max(1, Math.min(8, grooveBars + delta));
+    $('grvBarsVal').textContent = grooveBars;
+    buildCycleRow();
+  }
+}
+
+$('startBtn').addEventListener('click', () => playing ? stop() : start());
+
+// ── Audio Engine (Metronome Click Only) ──────────────────────────────────────
+function playClickSound(t, isAccent = false) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(isAccent ? 1200 : 800, t);
+  gain.gain.setValueAtTime(isAccent ? 0.4 : 0.25, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+  osc.start(t);
+  osc.stop(t + 0.04);
+}
+
+// ── Fill Generator ───────────────────────────────────────────────────────────
+// Computes, for each target size 0..16, whether some combination of the given
+// pattern lengths (repetition allowed) can sum to exactly that size.
+function computeReachable(lengths) {
+  const reachable = new Array(17).fill(false);
+  reachable[0] = true;
+  for (let i = 1; i <= 16; i++) {
+    reachable[i] = lengths.some(l => l <= i && reachable[i - l]);
+  }
+  return reachable;
+}
+
+function generateCombinedFill() {
+  let availablePool = MASTER_PATTERNS.filter(p => activePatternIds.has(p.id));
+  if (availablePool.length === 0) availablePool = MASTER_PATTERNS;
+
+  let lengths = [...new Set(availablePool.map(p => p.len))];
+  let reachable = computeReachable(lengths);
+
+  // The active selection can't sum to exactly 16 (e.g. only length-5 patterns
+  // active) — fall back to the full library so a valid 16-step fill is always possible.
+  if (!reachable[16]) {
+    availablePool = MASTER_PATTERNS;
+    lengths = [...new Set(availablePool.map(p => p.len))];
+    reachable = computeReachable(lengths);
+  }
+
+  // Step 1: pick the *shape* of the fill first — a sequence of lengths that
+  // sums to exactly 16, drawn evenly from the available lengths (not biased
+  // by how many patterns happen to share a given length).
+  let remaining = 16;
+  const lengthSequence = [];
+  while (remaining > 0) {
+    const validLens = lengths.filter(l => l <= remaining && reachable[remaining - l]);
+    const chosenLen = validLens[Math.floor(Math.random() * validLens.length)];
+    lengthSequence.push(chosenLen);
+    remaining -= chosenLen;
+  }
+
+  // Step 2: for each length slot, randomly pick one matching pattern from the
+  // active selection. This keeps pattern choice independent of the shape, so
+  // patterns don't feel predictive just because their length was scarce/common.
+  const combinedNotes = [];
+  const patternNames = [];
+  const patternLengths = [];
+
+  for (const len of lengthSequence) {
+    const candidates = availablePool.filter(p => p.len === len);
+    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+
+    combinedNotes.push(...chosen.seq);
+    patternNames.push(chosen.id);
+    patternLengths.push(chosen.len);
+  }
+
+  return { notes: combinedNotes, names: patternNames, lengths: patternLengths };
+}
+
+// ── Scheduler ─────────────────────────────────────────────────────────────────
+const sixteenthDur = () => (60 / bpm) / 4;
+const totalBarsInCycle = () => grooveBars + 1;
+
+function schedule() {
+  if (!playing) return;
+
+  while (nextBeatTime < audioCtx.currentTime + SCHEDULE_AHEAD) {
+    const totalStepsPerCycle = totalBarsInCycle() * 16;
+    const currentCycleStep = schedStep % totalStepsPerCycle;
+    const bar = Math.floor(currentCycleStep / 16);
+    const stepInBar = currentCycleStep % 16;
+
+    if (bar === 0 && stepInBar === 0) {
+      scheduledFillSequence = generateCombinedFill();
+    }
+
+    const isFill = bar >= grooveBars;
+    const isQuarterNote = (stepInBar % 4 === 0);
+
+    // Audio: Play metronome click on quarter notes across ALL bars
+    if (isQuarterNote) {
+      playClickSound(nextBeatTime, stepInBar === 0);
+    }
+
+    let fillNote = isFill ? scheduledFillSequence.notes[stepInBar] : null;
+
+    queue.push({
+      time: nextBeatTime,
+      bar: bar,
+      step: stepInBar,
+      visualType: isFill ? fillNote : (isQuarterNote ? 'Click' : null),
+      isFill: isFill,
+      fillNamesStr: scheduledFillSequence.names.join(' + '),
+      fillLensStr: '(' + scheduledFillSequence.lengths.join(' + ') + ')'
+    });
+
+    schedStep++;
+    nextBeatTime += sixteenthDur();
+  }
+
+  timerID = setTimeout(schedule, LOOKAHEAD_MS);
+}
+
+// ── Visual Loop ──────────────────────────────────────────────────────────────
+function visualLoop() {
+  if (!playing) return;
+  const now = audioCtx.currentTime;
+
+  while (queue.length > 0 && queue[0].time <= now) {
+    const ev = queue.shift();
+    updateVisuals(ev);
+  }
+
+  requestAnimationFrame(visualLoop);
+}
+
+function updateVisuals(ev) {
+  for (let i = 0; i < 16; i++) {
+    const box = $('sb' + i);
+    if (box) {
+      box.className = 'step-box' + (i % 4 === 0 ? ' beat-start' : '');
+      box.textContent = i + 1;
+    }
+  }
+
+  const activeBox = $('sb' + ev.step);
+  if (activeBox && ev.visualType) {
+    activeBox.classList.add('flash-' + ev.visualType);
+    activeBox.textContent = ev.visualType === 'Click' ? '•' : ev.visualType;
+  }
+
+  const badge = $('phaseBadge');
+  if (ev.isFill) {
+    badge.textContent = `FILL BAR`;
+    badge.className = 'phase-badge fill';
+  } else {
+    badge.textContent = `METRONOME (Bar ${ev.bar + 1}/${grooveBars})`;
+    badge.className = 'phase-badge groove';
+  }
+
+  updateCycleRow(ev.bar);
+
+  // Announcement logic: Display upcoming fill during groove, switch label to "Play Fill" during the fill bar
+  const announcement = $('announcementText');
+  if (ev.bar === 0 && ev.step === 0) {
+    announcement.innerHTML = `
+      <span class="label-title">Upcoming Fill:</span>
+      <div>${ev.fillNamesStr}</div>
+      <div class="lengths-sub">${ev.fillLensStr}</div>
+    `;
+  } else if (ev.bar === grooveBars && ev.step === 0) {
+    announcement.innerHTML = `
+      <span class="label-title" style="color: #ec4899;">Play Fill:</span>
+      <div style="color: #ec4899;">${ev.fillNamesStr}</div>
+      <div class="lengths-sub">${ev.fillLensStr}</div>
+    `;
+  }
+}
+
+// ── Cycle Bar Map ────────────────────────────────────────────────────────────
+function buildCycleRow() {
+  const row = $('cycleRow');
+  row.innerHTML = '';
+  const total = totalBarsInCycle();
+  for (let i = 0; i < total; i++) {
+    const b = document.createElement('div');
+    b.className = 'bar-block ' + (i < grooveBars ? 'groove' : 'fill');
+    b.textContent = i < grooveBars ? `G${i+1}` : 'Fill';
+    b.id = 'cb' + i;
+    row.appendChild(b);
+  }
+}
+
+function updateCycleRow(bar) {
+  const total = totalBarsInCycle();
+  for (let i = 0; i < total; i++) {
+    const b = $('cb' + i);
+    if (!b) continue;
+    b.classList.toggle('current', i === bar);
+    b.classList.toggle('past', i < bar);
+  }
+}
+
+// ── Start / Stop ─────────────────────────────────────────────────────────────
+function start() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  playing      = true;
+  schedStep    = 0;
+  nextBeatTime = audioCtx.currentTime + 0.08;
+  queue.length = 0;
+
+  scheduledFillSequence = generateCombinedFill();
+
+  $('startBtn').textContent = '■ Stop';
+  $('startBtn').classList.add('stop');
+
+  buildCycleRow();
+  schedule();
+  visualLoop();
+}
+
+function stop() {
+  playing = false;
+  clearTimeout(timerID);
+  timerID = null;
+  queue.length = 0;
+
+  $('startBtn').textContent = '▶ Start';
+  $('startBtn').classList.remove('stop');
+
+  $('phaseBadge').textContent = '— STOPPED —';
+  $('phaseBadge').className   = 'phase-badge idle';
+  $('announcementText').textContent = 'Press Start to begin training';
+
+  for (let i = 0; i < 16; i++) {
+    const box = $('sb' + i);
+    if (box) {
+      box.className = 'step-box' + (i % 4 === 0 ? ' beat-start' : '');
+      box.textContent = i + 1;
+    }
+  }
+  document.querySelectorAll('.bar-block').forEach(b => {
+    b.classList.remove('current', 'past');
+  });
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+initPatternTags();
+buildGridBoxes();
+buildCycleRow();
+</script>
+</body>
+</html>

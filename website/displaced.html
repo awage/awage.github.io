@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Displaced Click Trainer</title>
+  <title>Displaced Click - Reading</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥁</text></svg>">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -118,7 +119,7 @@
     /* ── Main display ──────────────────────────── */
     .display {
       width: 100%;
-      max-width: 640px;
+      max-width: min(1400px, 96vw);
       background: #1f2937;
       border-radius: 16px;
       padding: 1.5rem;
@@ -223,11 +224,152 @@
     #startBtn:hover  { background: #1d4ed8; transform: scale(1.04); }
     #startBtn.stop   { background: #dc2626; }
     #startBtn.stop:hover { background: #b91c1c; }
+
+    /* Party mode toggle */
+    #partyBtn {
+      background: transparent;
+      color: #9ca3af;
+      border: 2px solid #374151;
+      padding: 0.55rem 1.6rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.04em;
+    }
+    #partyBtn:hover { color: #f3f4f6; border-color: #6b7280; }
+    #partyBtn.active {
+      background: linear-gradient(90deg, #ec4899, #f97316, #facc15);
+      color: #111827;
+      border-color: transparent;
+    }
+
+    /* When party mode is active, hide cycle row + grey out unused controls */
+    body.party .cycle-row,
+    body.party .disp-desc,
+    body.party .ctrl.onb,
+    body.party .ctrl.disb,
+    body.party .ctrl.disp,
+    body.party .ctrl.sil { display: none; }
+
+    body.party .party-info { display: block; }
+    .party-info {
+      display: none;
+      font-size: 0.85rem;
+      color: #facc15;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .home-link { position: absolute; top: 1rem; left: 1.2rem; color: #9ca3af; text-decoration: none; font-size: 0.9rem; }
+    .home-link:hover { color: #f3f4f6; }
+    .controls { max-width: 900px; }
+    @media (min-width: 700px) { .controls { grid-template-columns: repeat(5, 1fr); } }
+    /* ── Reading section ───────────────────────── */
+    .figures {
+      width: 100%;
+      max-width: min(1400px, 96vw);
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem 1.6rem;
+      align-items: flex-start;
+    }
+    .fig-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .fig-group > span {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+    .tiles { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .tile { cursor: pointer; user-select: none; }
+    .tile input { display: none; }
+    .tile span {
+      display: inline-block;
+      background: #374151;
+      color: #d1d5db;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      transition: background 0.12s, color 0.12s;
+    }
+    .tile:hover span { background: #4b5563; }
+    .tile input:checked + span { background: #0e7490; color: #fff; }
+    #newBtn {
+      align-self: flex-end;
+      margin-left: auto;
+      background: #374151;
+      color: #f3f4f6;
+      border: none;
+      padding: 0.55rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #newBtn:hover { background: #4b5563; }
+
+    .reading {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .pattern-block { display: flex; flex-direction: column; gap: 0.3rem; }
+    .pattern-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+    }
+    .pattern-block.next .bars { background: #d1d5db; }
+    .pattern-block.next .bar-cell { background: #d1d5db; }
+    .pattern-block.next .pattern-label { color: #facc15; }
+    .bars {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: #fffbf2;
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .reading.grid22 .bars { grid-template-columns: repeat(2, 1fr); }
+    .reading.grid22 .bar-cell svg { max-height: 150px; }
+    #layoutBtn {
+      background: #374151; color: #f3f4f6; border: none; border-radius: 8px;
+      padding: 0.15rem 0.7rem; font-size: 0.72rem; cursor: pointer; letter-spacing: 0.06em;
+    }
+    #layoutBtn:hover { background: #4b5563; }
+    .bar-cell {
+      border-radius: 8px;
+      border: 3px solid transparent;
+      background: #fffbf2;
+      padding: 6px 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .bar-cell.now { background: #fde68a; border-color: #f59e0b; }
+    .bar-cell svg { display: block; }
+    .badge-count {
+      font-variant-numeric: tabular-nums;
+      color: #f3f4f6;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Displaced <span>Click</span> Trainer</h1>
+  <a href="index.html" class="home-link">← Home</a>
+  <h1>Displaced <span>Click</span> Reading Trainer</h1>
 
   <div class="controls">
     <div class="ctrl bpm">
@@ -273,6 +415,38 @@
     </div>
   </div>
 
+
+  <div class="figures">
+    <div class="fig-group">
+      <span>One-beat figures</span>
+      <div class="tiles">
+        <label class="tile"><input type="checkbox" class="onebeat" value="1" checked><span>4th</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="2" checked><span>8th</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="3" checked><span>16th</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="4"><span>Triplets</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="5"><span>5th</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="6"><span>6th</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="7"><span>7th</span></label>
+      </div>
+    </div>
+    <div class="fig-group">
+      <span>Two-beat figures</span>
+      <div class="tiles">
+        <label class="tile"><input type="checkbox" class="onebeat" value="8"><span>3:2</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="9"><span>5:4</span></label>
+        <label class="tile"><input type="checkbox" class="onebeat" value="10"><span>7:4</span></label>
+      </div>
+    </div>
+    <div class="fig-group">
+      <span>Rests</span>
+      <div class="tiles">
+        <label class="tile"><input type="radio" name="dif" value="1" checked><span>Easy</span></label>
+        <label class="tile"><input type="radio" name="dif" value="2"><span>Hard</span></label>
+      </div>
+    </div>
+    <button id="newBtn" type="button">⚡ New patterns</button>
+  </div>
+
   <div class="display">
     <div class="phase-badge idle" id="phaseBadge">— STOPPED —</div>
 
@@ -283,15 +457,32 @@
       <div class="dot" id="d3"></div>
     </div>
 
+    <div class="reading" id="reading">
+      <div class="pattern-block now">
+        <div class="pattern-label"><span>Now playing</span><span><button id="layoutBtn" type="button">LAYOUT: 4×1</button> &nbsp; <span class="badge-count" id="barCount">Bar –/4</span></span></div>
+        <div class="bars" id="barsNow"></div>
+      </div>
+      <div class="pattern-block next">
+        <div class="pattern-label"><span>Next · read ahead</span><span></span></div>
+        <div class="bars" id="barsNext"></div>
+      </div>
+    </div>
+
     <div class="cycle-row" id="cycleRow"></div>
 
     <div class="disp-desc" id="dispDesc">
       Displaced click: <strong>+1 sixteenth note late</strong>
     </div>
+
+    <div class="party-info">🎲 Each odd bar is a surprise: silent or displaced +1, +2, +3</div>
   </div>
+
+  <button id="partyBtn">🎉 Party Mode</button>
 
   <button id="startBtn">▶ Start</button>
 
+<script src="js/abcjs_basic.min.js"></script>
+<script src="js/rdm_rhythm.js"></script>
 <script>
 // ── State ────────────────────────────────────────────────────────────────────
 let audioCtx = null;
@@ -303,6 +494,10 @@ let onTimeBars  = 4;
 let dispBars    = 4;
 let dispSteps   = 1;   // 16th note steps, can be negative
 let silentBars  = 0;
+
+let partyMode       = false;
+let partyBarPhase   = 'on-time';  // chosen at the start of each bar
+let partyBarDisp    = 0;
 
 // Scheduler counters
 let nextBeatTime = 0;
@@ -351,6 +546,127 @@ function adj(param, delta) {
 
 $('startBtn').addEventListener('click', () => playing ? stop() : start());
 
+$('partyBtn').addEventListener('click', () => {
+  partyMode = !partyMode;
+  $('partyBtn').classList.toggle('active', partyMode);
+  document.body.classList.toggle('party', partyMode);
+  if (playing) { stop(); start(); }
+});
+
+
+// ── Reading patterns (groove_random engine) ─────────────────────────────────
+const PATTERN_BARS = 4;      // a new pattern every four bars
+let curPattern  = null;      // array of PATTERN_BARS ABC strings (one per bar)
+let nextPattern = null;
+
+function readingOptions() {
+  return {
+    figures: Array.from(document.querySelectorAll('input.onebeat:checked')).map(cb => cb.value),
+    level:   document.querySelector('input[name="dif"]:checked').value
+  };
+}
+
+// One bar of 4/4 as an ABC body, built by the groove_random reading engine.
+function generateBar() {
+  const o = readingOptions();
+  if (o.figures.length === 0) o.figures.push('1');   // fall back to quarter notes
+  // generate_reading_exercise() appends the rest figure to the array it gets
+  const abc = generate_reading_exercise(o.figures.slice(), [o.level], '4/4', 'simple', 0.5, 1);
+  return abc.replace(/\s*\|\]\s*$/, '').replace(/\n/g, ' ').trim();
+}
+
+function generatePattern() {
+  const p = [];
+  for (let i = 0; i < PATTERN_BARS; i++) p.push(generateBar());
+  return p;
+}
+
+function renderBar(cell, body) {
+  cell.innerHTML = '';
+  const holder = document.createElement('div');
+  holder.style.width = '100%';
+  cell.appendChild(holder);
+  const header = 'X:1\nM:none\nL:1/16\nK:clef=none stafflines=1\n';
+  try {
+    // Draw on a small virtual canvas, then scale the drawing up to fill the cell
+    ABCJS.renderAbc(holder, header + body + ' |\n', {}, { scale: 1, staffwidth: 190, paddingtop: 0, paddingbottom: 0, paddingleft: 0, paddingright: 0 }, {});
+    const svg = holder.querySelector('svg');
+    if (svg) {
+      const bb = svg.getBBox(), pad = 8;
+      svg.setAttribute('viewBox', [bb.x - pad, bb.y - pad, bb.width + 2 * pad, bb.height + 2 * pad].join(' '));
+      svg.removeAttribute('width');
+      svg.removeAttribute('height');
+      svg.style.width = '100%';
+      svg.style.height = 'auto';
+      // abcjs sets fixed pixel sizes on the holder and its wrappers: let them follow the cell
+      holder.style.width = '100%';
+      holder.style.height = 'auto';
+      for (let el = svg.parentElement; el && el !== holder; el = el.parentElement) {
+        el.style.width = '100%';
+        el.style.height = 'auto';
+        el.style.paddingBottom = '0';
+      }
+    }
+  } catch (e) { console.error(e); cell.textContent = body; }
+}
+
+function renderPattern(containerId, pattern) {
+  const box = $(containerId);
+  box.innerHTML = '';
+  pattern.forEach((body, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'bar-cell';
+    cell.id = containerId + i;
+    box.appendChild(cell);
+    renderBar(cell, body, i === 0);
+  });
+}
+
+function showPatterns() {
+  if (curPattern)  renderPattern('barsNow',  curPattern);
+  if (nextPattern) renderPattern('barsNext', nextPattern);
+  highlightBar(-1);
+}
+
+function highlightBar(i) {
+  for (let k = 0; k < PATTERN_BARS; k++) {
+    const c = $('barsNow' + k);
+    if (c) c.classList.toggle('now', k === i);
+  }
+  $('barCount').textContent = i < 0 ? 'Bar –/' + PATTERN_BARS : 'Bar ' + (i + 1) + '/' + PATTERN_BARS;
+}
+
+// Called on the first beat of a bar that starts a new block of four bars.
+function advancePattern() {
+  curPattern  = nextPattern;
+  nextPattern = generatePattern();
+  showPatterns();
+}
+
+function newPatterns() {
+  if (playing) {                    // keep the pattern being played, change what comes next
+    nextPattern = generatePattern();
+    renderPattern('barsNext', nextPattern);
+  } else {
+    curPattern  = generatePattern();
+    nextPattern = generatePattern();
+    showPatterns();
+  }
+}
+
+$('newBtn').addEventListener('click', newPatterns);
+$('layoutBtn').addEventListener('click', () => {
+  const g = $('reading').classList.toggle('grid22');
+  $('layoutBtn').textContent = 'LAYOUT: ' + (g ? '2×2' : '4×1');
+  showPatterns();
+});
+document.querySelectorAll('.figures input').forEach(i => i.addEventListener('change', () => {
+  // options changed: refresh what has not been played yet
+  if (playing) { nextPattern = generatePattern(); renderPattern('barsNext', nextPattern); }
+  else newPatterns();
+}));
+window.addEventListener('resize', () => { clearTimeout(window._rs); window._rs = setTimeout(showPatterns, 200); });
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const beatDur   = () => 60 / bpm;
 const sixteenth = () => beatDur() / 4;
@@ -393,19 +709,34 @@ function click(t, displaced) {
 function schedule() {
   if (!playing) return;
 
-  const negBuf = dispSteps < 0 ? Math.abs(dispSteps) * sixteenth() : 0;
+  const negBuf = (!partyMode && dispSteps < 0) ? Math.abs(dispSteps) * sixteenth() : 0;
   while (nextBeatTime < audioCtx.currentTime + SCHEDULE_AHEAD + negBuf) {
-    const bar   = schedBar;
-    const beat  = schedBeat;
-    const phase = getPhase(bar);
+    const bar  = schedBar;
+    const beat = schedBeat;
+
+    // At the start of each new bar in party mode, roll the dice
+    if (partyMode && beat === 0) {
+      if (bar % 2 === 0) {
+        partyBarPhase = 'on-time';
+        partyBarDisp  = 0;
+      } else {
+        const choices = ['silent', 1, 2, 3];
+        const pick    = choices[Math.floor(Math.random() * choices.length)];
+        if (pick === 'silent') { partyBarPhase = 'silent';    partyBarDisp = 0; }
+        else                   { partyBarPhase = 'displaced'; partyBarDisp = pick; }
+      }
+    }
+
+    const phase = partyMode ? partyBarPhase : getPhase(bar);
+    const disp  = partyMode ? partyBarDisp  : dispSteps;
     const base  = nextBeatTime;
-    const clickT = phase === 'displaced' ? base + dispSteps * sixteenth() : base;
+    const clickT = phase === 'displaced' ? base + disp * sixteenth() : base;
 
     if (phase !== 'silent') {
       click(clickT, phase === 'displaced');
     }
 
-    queue.push({ baseTime: base, clickTime: clickT, beat, bar, phase });
+    queue.push({ baseTime: base, clickTime: clickT, beat, bar, phase, disp });
 
     schedBeat++;
     if (schedBeat >= 4) { schedBeat = 0; schedBar++; }
@@ -460,8 +791,8 @@ function flashDot(ev) {
 function updatePhase(ev) {
   const badge = $('phaseBadge');
   if (ev.phase === 'displaced') {
-    const s = dispSteps >= 0 ? '+' : '';
-    badge.textContent = `DISPLACED  ${s}${dispSteps} / 16`;
+    const s = ev.disp >= 0 ? '+' : '';
+    badge.textContent = `DISPLACED  ${s}${ev.disp} / 16`;
     badge.className = 'phase-badge displaced';
   } else if (ev.phase === 'silent') {
     badge.textContent = 'SILENT';
@@ -471,6 +802,10 @@ function updatePhase(ev) {
     badge.className = 'phase-badge on-time';
   }
   updateCycleRow(ev.bar);
+
+  // Reading: new pattern every PATTERN_BARS bars, highlight the current bar
+  if (ev.beat === 0 && ev.bar > 0 && ev.bar % PATTERN_BARS === 0) advancePattern();
+  highlightBar(ev.bar % PATTERN_BARS);
 }
 
 function buildCycleRow() {
@@ -535,6 +870,7 @@ function stop() {
     const d = $('d' + i);
     d.classList.remove('flash-on', 'flash-off');
   }
+  highlightBar(-1);
   // Clear cycle highlights
   document.querySelectorAll('.bar-block').forEach(b =>
     b.classList.remove('current', 'past')
@@ -544,6 +880,9 @@ function stop() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 buildCycleRow();
 updateDispDesc();
+curPattern  = generatePattern();
+nextPattern = generatePattern();
+showPatterns();
 </script>
 </body>
 </html>
